@@ -15,13 +15,17 @@ export class AppComponent implements OnInit {
 
   public _hubConnection: HubConnection;
   customers: any = [];
-
-  count = this.customers.length;
+  count = 0;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
+    this.http.get('https://localhost:7176/api/customer').subscribe((data) => {
+      this.customers = data;
+      this.count = this.customers.length;
+    });
     this.count = this.customers.length;
+    this.refreshList();
     this._hubConnection = new HubConnectionBuilder()
       .withUrl('https://localhost:7176/customer')
       .build();
@@ -29,12 +33,9 @@ export class AppComponent implements OnInit {
       .start()
       .then(() => console.log('Connection started!'))
       .catch((err) => console.log('Error while establishing connection :('));
-
-      
     this._hubConnection.on('BroadcastCustumer', (c) => {
-      this.count = c;
+      this.customers.push(c);
     });
-    this.refreshList();
   }
 
   refreshList() {
